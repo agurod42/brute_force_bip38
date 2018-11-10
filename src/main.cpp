@@ -83,8 +83,6 @@ int main(int argc, char** argv) {
         unique_lock<mutex> sync_lock(sync_mutex);
         sync_condition.wait(sync_lock, [&] { return number_of_threads < number_of_cpus; });
 
-        cout << "\033[1A" << progress.log(tested_secrets) << endl << flush;
-
         thread([&](string secret) {
 
             number_of_threads++;
@@ -93,6 +91,7 @@ int main(int argc, char** argv) {
             string decrypted_public_key = bip38_public_key_from_private_key(private_key, secret);
 
             tested_secrets++;
+            cout << "\033[1A" << progress.log(tested_secrets) << endl << flush;
 
             if (decrypted_public_key == public_key) {
                 cout << "Saving valid secret (" << secret << ") to \"" << VALID_SECRET_PATH << "\"..." << endl;
@@ -118,6 +117,10 @@ int main(int argc, char** argv) {
 
     unique_lock<mutex> sync_lock(sync_mutex);
     sync_condition.wait(sync_lock, [&] { return tested_secrets == secrets.size(); });
+
+    // Print performance stats
+
+    cout << progress.log_performance() << endl;
 
     return 0;
 }
