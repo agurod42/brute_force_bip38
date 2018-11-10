@@ -1,8 +1,8 @@
 #include <string>
 
-#include "third_party/libwally-core/include/wally_core.h"
-#include "third_party/libwally-core/include/wally_crypto.h"
-#include "third_party/libwally-core/include/wally_bip38.h"
+#include "../third_party/libwally-core/include/wally_core.h"
+#include "../third_party/libwally-core/include/wally_crypto.h"
+#include "../third_party/libwally-core/include/wally_bip38.h"
 
 using namespace std;
 

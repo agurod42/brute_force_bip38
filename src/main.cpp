@@ -2,7 +2,6 @@
 #include <condition_variable>
 #include <fstream>
 #include <iostream>
-#include <json/json.h>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -12,9 +11,9 @@
 #include "config.hpp"
 #include "progress.hpp"
 
-#define CONFIG_PATH          "config.json"
-#define INVALID_SECRETS_PATH "invalid_secrets.json"
-#define VALID_SECRETS_PATH   "valid_secret.json"
+#define CONFIG_PATH          "config.txt"
+#define INVALID_SECRETS_PATH "invalid_secrets.txt"
+#define VALID_SECRETS_PATH   "valid_secret.txt"
 
 using namespace brute38;
 using namespace std;
@@ -22,46 +21,18 @@ using namespace std;
 int main(int argc, char** argv) {
 
     config config(CONFIG_PATH);
-    string public_key = config.get("publicAddressHex");
-    string private_key = config.get("encryptedPrivateKey");
+    string public_key = config.public_address;
+    string private_key = config.encripted_private_key;
 
     unsigned number_of_cpus = thread::hardware_concurrency();
 
+    vector<string> invalid_secrets;
     vector<string> secrets = {
         "Satoshi",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
-        "1",
+        "1", "1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1",
         "TestingOneTwoThree",
     };
     atomic_int tested_secrets(0);
-
-    Json::Value invalid_secrets;
-    Json::Value valid_secrets;
 
     // Display start info
 
@@ -74,8 +45,9 @@ int main(int argc, char** argv) {
     cout << "Importing invalid secrets from \"" << INVALID_SECRETS_PATH << "\"..." << endl;
 
     try {
-        ifstream file_stream(INVALID_SECRETS_PATH, ifstream::binary);
-        file_stream >> invalid_secrets;
+        ifstream file_stream(INVALID_SECRETS_PATH);
+        for (string line; getline(file_stream, line);) invalid_secrets.push_back(line);
+        file_stream.close();
         cout << "Imported " << invalid_secrets.size() << " invalid secrets that will be skipped." << endl; 
     } catch (...) {
         cout << "No invalid secrets have been found, moving on..." << endl;
@@ -108,7 +80,7 @@ int main(int argc, char** argv) {
         unique_lock<mutex> sync_lock(sync_mutex);
         sync_condition.wait(sync_lock, [&] { return number_of_threads < number_of_cpus; });
 
-        cout << progress.log(tested_secrets) << flush;
+        cout << "\033[1A" << progress.log(tested_secrets) << endl << flush;
 
         thread([&](string secret) {
 
@@ -120,7 +92,7 @@ int main(int argc, char** argv) {
             tested_secrets++;
 
             if (decrypted_public_key == public_key) {
-                cout << endl << "Saving valid secret (" << secret << ") to \"" << VALID_SECRETS_PATH << "\"..." << endl;
+                cout << "Saving valid secret (" << secret << ") to \"" << VALID_SECRETS_PATH << "\"..." << endl;
                 ofstream file_stream(VALID_SECRETS_PATH, ofstream::out);
                 file_stream << secret;
                 file_stream.close();
