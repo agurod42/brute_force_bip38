@@ -12,8 +12,9 @@
 #include "progress.hpp"
 
 #define CONFIG_PATH          "config.txt"
+#define SECRETS_PATH         "secrets.txt"
 #define INVALID_SECRETS_PATH "invalid_secrets.txt"
-#define VALID_SECRETS_PATH   "valid_secret.txt"
+#define VALID_SECRET_PATH    "valid_secret.txt"
 
 using namespace brute38;
 using namespace std;
@@ -27,18 +28,8 @@ int main(int argc, char** argv) {
     unsigned number_of_cpus = thread::hardware_concurrency();
 
     vector<string> invalid_secrets;
-    vector<string> secrets = {
-        "Satoshi",
-        "1", "1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1",
-        "TestingOneTwoThree",
-    };
+    vector<string> secrets;
     atomic_int tested_secrets(0);
-
-    // Display start info
-
-    cout << "Testing " << secrets.size() << " secrets on " << number_of_cpus << " CPU cores..." << endl;
-    cout << "Public address: " << public_key << endl;
-    cout << "BIP38 encrypted private key: " << private_key << endl;
 
     // Import invalid secrets
 
@@ -53,18 +44,30 @@ int main(int argc, char** argv) {
         cout << "No invalid secrets have been found, moving on..." << endl;
     }
 
-    // Filter secrets
+    // Load and filter secrets
 
     cout << "Filtering secrets..." << endl;
 
-    secrets.erase(
-        remove_if(secrets.begin(), secrets.end(), [&](string secret) { 
-            for (auto invalid_secret : invalid_secrets)
-                if (invalid_secret == secret) return true;
-            return false;
-        }),
-        secrets.end()
-    );
+    ifstream file_stream(SECRETS_PATH);
+    for (string line; getline(file_stream, line);) {
+        bool valid = true;
+        for (auto invalid_secret : invalid_secrets) {
+            if (invalid_secret == line) {
+                valid = false;
+                break;
+            }
+        }
+        if (valid) {
+            secrets.push_back(line);
+        }
+    }
+    file_stream.close();
+
+    // Display start info
+
+    cout << "Testing " << secrets.size() << " secrets on " << number_of_cpus << " CPU cores..." << endl;
+    cout << "Public address: " << public_key << endl;
+    cout << "BIP38 encrypted private key: " << private_key << endl;
 
     // Decrypt
     
@@ -92,8 +95,8 @@ int main(int argc, char** argv) {
             tested_secrets++;
 
             if (decrypted_public_key == public_key) {
-                cout << "Saving valid secret (" << secret << ") to \"" << VALID_SECRETS_PATH << "\"..." << endl;
-                ofstream file_stream(VALID_SECRETS_PATH, ofstream::out);
+                cout << "Saving valid secret (" << secret << ") to \"" << VALID_SECRET_PATH << "\"..." << endl;
+                ofstream file_stream(VALID_SECRET_PATH, ofstream::out);
                 file_stream << secret;
                 file_stream.close();
                 cout << "A valid secret has been found, aborting..." << endl;
