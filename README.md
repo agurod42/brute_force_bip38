@@ -1,6 +1,6 @@
 # brute_force_bip38
 
-C++ implementation of the brute-force decoder of BIP38 encoded private keys written by [countzero/brute_force_bip38](https://github.com/countzero/brute_force_bip38.git).
+C++ implementation of the brute-force decoder of BIP38 encrypted private keys written by [countzero/brute_force_bip38](https://github.com/countzero/brute_force_bip38.git).
 
 ## Build
 
