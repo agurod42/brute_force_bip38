@@ -26,17 +26,6 @@ target_include_directories(libwally-core
 target_link_libraries(libwally-core PUBLIC secp256k1)
 target_compile_definitions(libwally-core PRIVATE SECP256K1_BUILD)
 
-if (DEFINED IOS_PLATFORM)
-    target_compile_options(libwally-core
-        PRIVATE
-            -W -Wcast-align -Wnested-externs -Wshadow -Wstrict-prototypes
-            -Wformat -Wformat-security  -Wformat-nonliteral -O3
-            -D_FORTIFY_SOURCE=1 -fstack-protector-strong -DNDEBUG=1 -flto
-            -flax-vector-conversions -Wno-unused-function -Wno-long-long
-            -Wno-overlength-strings -Wno-variadic-macros  -MP
-    )
-endif()
-
 add_library(secp256k1
     src/secp256k1/src/secp256k1.c
 )
