@@ -1,4 +1,6 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required(VERSION 2.8)
+
+# libwally-core
 
 add_library(libwally-core
     src/aes.c
@@ -15,6 +17,7 @@ add_library(libwally-core
     src/ccan/ccan/crypto/sha512/sha512.c
     src/ccan/ccan/str/hex/hex.c
 )
+
 target_include_directories(libwally-core
     PUBLIC
         .
@@ -23,8 +26,17 @@ target_include_directories(libwally-core
         src/secp256k1
         src/secp256k1/include
 )
+
 target_link_libraries(libwally-core PUBLIC secp256k1)
+
+target_compile_options(libwally-core
+    PRIVATE
+        -std=c11
+)
+
 target_compile_definitions(libwally-core PRIVATE SECP256K1_BUILD)
+
+# secp256k1
 
 add_library(secp256k1
     src/secp256k1/src/secp256k1.c

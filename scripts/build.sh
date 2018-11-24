@@ -5,7 +5,7 @@
 echo "Installing dependencies..."
 uname="$(uname -s)"
 case "${uname}" in
-    Linux*)     sudo apt-get install -y build-essential cmake3 libtool
+    Linux*)     sudo apt-get install -y build-essential cmake libtool
                 ;;
     Darwin*)    brew install autoconf automake cmake libtool
                 ;;
@@ -15,7 +15,7 @@ esac
 
 # Build libwally-core
 
-if [ ! -f third_party/libwally-core/src/config.h ]; then
+if [ ! -f third_party/libwally-core/src/config.h ] || [ "$1" == "--with-libwally-rebuild" ]; then
     echo "Building libwally-core..."
     cd third_party/libwally-core
     ./tools/autogen.sh
